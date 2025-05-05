@@ -1,0 +1,61 @@
+# Exp6
+Load and implement the Face Detection method in OpenCV using python
+
+
+pip install opencv-python face-recognition numpy
+
+
+# Install necessary libraries (Only needed once per Colab session)
+!apt-get update
+!apt-get install -y libgtk2.0-dev pkg-config
+!pip install --upgrade opencv-python
+
+import cv2
+from google.colab.patches import cv2_imshow
+
+# Load Haar cascade for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+
+# Open the video file
+video_path = "/content/Infrastructure _ Rajalakshmi Engineering College.mp4"
+cap = cv2.VideoCapture(video_path)
+
+# Get the total number of frames in the video
+total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+
+while True:
+    try:
+        target_frame = int(input(f"Enter the frame number (0 - {total_frames - 1}): "))
+        if 0 <= target_frame < total_frames:
+            break
+        else:
+            print(f"Invalid input! Please enter a number between 0 and {total_frames - 1}.")
+    except ValueError:
+        print("Please enter a valid integer.")
+
+# Set the video position to the target frame
+cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
+
+# Read the specific frame
+ret, frame = cap.read()
+
+if ret:
+    # Convert frame to grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Detect faces in the frame
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5, minSize=(30, 30))
+
+    # Draw rectangles around detected faces
+    for (x, y, w, h) in faces:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 10)
+        cv2.putText(frame, "Face", (x, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 10)
+
+    # Show the frame with detected faces
+    cv2_imshow(frame)  # Use cv2_imshow() in Colab
+else:
+    print("Error: Could not read the target frame. Check if the frame number is within the video range.")
+
+# Release resources
+cap.release()
